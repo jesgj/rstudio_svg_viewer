@@ -45,9 +45,25 @@ launch_svg_viewer <- function(file = NULL) {
   ui <- build_svg_gadget_ui(svg_text = svg_text, file_label = basename(path))
   server <- run_svg_gadget_server()
 
-  viewer <- build_dialog_viewer(file_label = basename(path))
+  viewer <- build_gadget_viewer(file_label = basename(path))
 
   run_gadget_compat(ui = ui, server = server, viewer = viewer)
+}
+
+build_gadget_viewer <- function(file_label, pane_viewer_fn = NULL, dialog_viewer_fn = shiny::dialogViewer) {
+  if (is.null(pane_viewer_fn) && exists("paneViewer", envir = asNamespace("shiny"), inherits = FALSE)) {
+    pane_viewer_fn <- get("paneViewer", envir = asNamespace("shiny"), inherits = FALSE)
+  }
+
+  if (is.function(pane_viewer_fn)) {
+    pane_formals <- names(formals(pane_viewer_fn))
+    if (!is.null(pane_formals) && "minHeight" %in% pane_formals) {
+      return(pane_viewer_fn(minHeight = 600))
+    }
+    return(pane_viewer_fn())
+  }
+
+  build_dialog_viewer(file_label = file_label, dialog_viewer_fn = dialog_viewer_fn)
 }
 
 build_dialog_viewer <- function(file_label, dialog_viewer_fn = shiny::dialogViewer) {
@@ -128,17 +144,18 @@ run_svg_gadget_server <- function() {
 build_svg_gadget_ui <- function(svg_text, file_label) {
   miniUI::miniPage(
     miniUI::gadgetTitleBar(
-      title = paste0("SVG Viewer: ", file_label),
-      left = miniUI::miniTitleBarButton("fit_view", "Fit"),
-      right = shiny::tagList(
-        miniUI::miniTitleBarButton("zoom_out", "-"),
-        miniUI::miniTitleBarButton("zoom_in", "+"),
-        miniUI::miniTitleBarButton("reset_view", "Reset")
-      )
+      title = paste0("SVG Viewer: ", file_label)
     ),
     miniUI::miniContentPanel(
       htmltools::tags$div(
         id = "svg_viewer_root",
+        htmltools::tags$div(
+          id = "svg_toolbar",
+          shiny::actionButton("fit_view", "Fit", class = "btn btn-default btn-sm"),
+          shiny::actionButton("zoom_out", "-", class = "btn btn-default btn-sm"),
+          shiny::actionButton("zoom_in", "+", class = "btn btn-default btn-sm"),
+          shiny::actionButton("reset_view", "Reset", class = "btn btn-default btn-sm")
+        ),
         htmltools::tags$div(
           id = "svg_viewport",
           htmltools::tags$div(id = "svg_stage", htmltools::HTML(svg_text))
@@ -263,9 +280,27 @@ svg_viewer_css <- function() {
     "margin: 0;",
     "background: #f6f7f9;",
     "}",
+    "#svg_viewer_root {",
+    "display: flex;",
+    "flex-direction: column;",
+    "}",
+    "#svg_toolbar {",
+    "display: flex;",
+    "align-items: center;",
+    "gap: 8px;",
+    "padding: 8px 10px;",
+    "border: 1px solid #d7dde5;",
+    "border-bottom: none;",
+    "background: #ffffff;",
+    "flex: 0 0 auto;",
+    "}",
+    "#svg_toolbar .btn {",
+    "padding: 4px 10px;",
+    "}",
     "#svg_viewport {",
     "position: relative;",
-    "height: 100%;",
+    "flex: 1 1 auto;",
+    "min-height: 0;",
     "overflow: hidden;",
     "border: 1px solid #d7dde5;",
     "background: linear-gradient(45deg, #ffffff 25%, #f0f3f8 25%, #f0f3f8 50%, #ffffff 50%, #ffffff 75%, #f0f3f8 75%, #f0f3f8 100%);",

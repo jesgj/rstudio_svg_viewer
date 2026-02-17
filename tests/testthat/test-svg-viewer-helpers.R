@@ -82,6 +82,43 @@ test_that("build_svg_gadget_ui includes expected control ids", {
   expect_true(grepl("fit_view", html, fixed = TRUE))
   expect_true(grepl("reset_view", html, fixed = TRUE))
   expect_true(grepl("svg_viewport", html, fixed = TRUE))
+  expect_false(grepl(">\\s*pull-right\\s*<", html))
+})
+
+test_that("build_gadget_viewer prefers paneViewer with minHeight when available", {
+  captured <- NULL
+  fake_pane_viewer <- function(minHeight = NULL) {
+    captured <<- list(minHeight = minHeight)
+    "pane-viewer"
+  }
+
+  out <- rstudioSvgViewer:::build_gadget_viewer(
+    file_label = "demo.svg",
+    pane_viewer_fn = fake_pane_viewer,
+    dialog_viewer_fn = function(...) "dialog-viewer"
+  )
+
+  expect_equal(out, "pane-viewer")
+  expect_equal(captured$minHeight, 600)
+})
+
+test_that("build_gadget_viewer falls back to dialog viewer when paneViewer is unavailable", {
+  captured <- NULL
+  fake_dialog_viewer <- function(dialogName = NULL, width, height) {
+    captured <<- list(dialogName = dialogName, width = width, height = height)
+    "dialog-viewer"
+  }
+
+  out <- rstudioSvgViewer:::build_gadget_viewer(
+    file_label = "fallback.svg",
+    pane_viewer_fn = FALSE,
+    dialog_viewer_fn = fake_dialog_viewer
+  )
+
+  expect_equal(out, "dialog-viewer")
+  expect_equal(captured$dialogName, "SVG Viewer - fallback.svg")
+  expect_equal(captured$width, 980)
+  expect_equal(captured$height, 760)
 })
 
 test_that("build_dialog_viewer uses title when available", {
