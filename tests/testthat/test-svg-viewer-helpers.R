@@ -136,3 +136,75 @@ test_that("build_dialog_viewer works without title-like formals", {
   expect_equal(captured$width, 980)
   expect_equal(captured$height, 760)
 })
+
+test_that("run_gadget_compat uses ui when available", {
+  captured <- NULL
+  fake_run_gadget <- function(ui, server = NULL, viewer = NULL) {
+    captured <<- list(ui = ui, server = server, viewer = viewer)
+    invisible(TRUE)
+  }
+
+  ui_obj <- structure(list(), class = "fake_ui")
+  server_obj <- function(input, output, session) NULL
+  viewer_obj <- function(url) url
+
+  out <- rstudioSvgViewer:::run_gadget_compat(
+    ui = ui_obj,
+    server = server_obj,
+    viewer = viewer_obj,
+    run_gadget_fn = fake_run_gadget
+  )
+
+  expect_true(isTRUE(out))
+  expect_identical(captured$ui, ui_obj)
+  expect_identical(captured$server, server_obj)
+  expect_identical(captured$viewer, viewer_obj)
+})
+
+test_that("run_gadget_compat falls back to app argument", {
+  captured <- NULL
+  fake_run_gadget <- function(app, server = NULL, viewer = NULL) {
+    captured <<- list(app = app, server = server, viewer = viewer)
+    "ok"
+  }
+
+  ui_obj <- structure(list(), class = "fake_ui")
+  server_obj <- function(input, output, session) NULL
+  viewer_obj <- function(url) url
+
+  out <- rstudioSvgViewer:::run_gadget_compat(
+    ui = ui_obj,
+    server = server_obj,
+    viewer = viewer_obj,
+    run_gadget_fn = fake_run_gadget
+  )
+
+  expect_equal(out, "ok")
+  expect_identical(captured$app, ui_obj)
+  expect_identical(captured$server, server_obj)
+  expect_identical(captured$viewer, viewer_obj)
+})
+
+test_that("run_gadget_compat works with positional-only signature", {
+  captured <- NULL
+  fake_run_gadget <- function(first, second, third) {
+    captured <<- list(first = first, second = second, third = third)
+    123
+  }
+
+  ui_obj <- structure(list(), class = "fake_ui")
+  server_obj <- function(input, output, session) NULL
+  viewer_obj <- function(url) url
+
+  out <- rstudioSvgViewer:::run_gadget_compat(
+    ui = ui_obj,
+    server = server_obj,
+    viewer = viewer_obj,
+    run_gadget_fn = fake_run_gadget
+  )
+
+  expect_equal(out, 123)
+  expect_identical(captured$first, ui_obj)
+  expect_identical(captured$second, server_obj)
+  expect_identical(captured$third, viewer_obj)
+})

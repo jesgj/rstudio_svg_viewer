@@ -47,7 +47,7 @@ launch_svg_viewer <- function(file = NULL) {
 
   viewer <- build_dialog_viewer(file_label = basename(path))
 
-  shiny::runGadget(ui = ui, server = server, viewer = viewer)
+  run_gadget_compat(ui = ui, server = server, viewer = viewer)
 }
 
 build_dialog_viewer <- function(file_label, dialog_viewer_fn = shiny::dialogViewer) {
@@ -65,6 +65,36 @@ build_dialog_viewer <- function(file_label, dialog_viewer_fn = shiny::dialogView
   }
 
   do.call(dialog_viewer_fn, args)
+}
+
+run_gadget_compat <- function(ui, server, viewer, run_gadget_fn = shiny::runGadget) {
+  formal_names <- names(formals(run_gadget_fn))
+  if (is.null(formal_names)) {
+    formal_names <- character(0)
+  }
+
+  args <- list()
+  if ("ui" %in% formal_names) {
+    args$ui <- ui
+  } else if ("app" %in% formal_names) {
+    args$app <- ui
+  } else {
+    args[[1]] <- ui
+  }
+
+  if ("server" %in% formal_names) {
+    args$server <- server
+  } else {
+    args[[length(args) + 1]] <- server
+  }
+
+  if ("viewer" %in% formal_names) {
+    args$viewer <- viewer
+  } else {
+    args[[length(args) + 1]] <- viewer
+  }
+
+  do.call(run_gadget_fn, args)
 }
 
 run_svg_gadget_server <- function() {
