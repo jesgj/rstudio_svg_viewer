@@ -45,13 +45,26 @@ launch_svg_viewer <- function(file = NULL) {
   ui <- build_svg_gadget_ui(svg_text = svg_text, file_label = basename(path))
   server <- run_svg_gadget_server()
 
-  viewer <- shiny::dialogViewer(
-    title = paste0("SVG Viewer - ", basename(path)),
-    width = 980,
-    height = 760
-  )
+  viewer <- build_dialog_viewer(file_label = basename(path))
 
   shiny::runGadget(ui = ui, server = server, viewer = viewer)
+}
+
+build_dialog_viewer <- function(file_label, dialog_viewer_fn = shiny::dialogViewer) {
+  title_text <- paste0("SVG Viewer - ", file_label)
+  formal_names <- names(formals(dialog_viewer_fn))
+  if (is.null(formal_names)) {
+    formal_names <- character(0)
+  }
+
+  args <- list(width = 980, height = 760)
+  if ("title" %in% formal_names) {
+    args$title <- title_text
+  } else if ("dialogName" %in% formal_names) {
+    args$dialogName <- title_text
+  }
+
+  do.call(dialog_viewer_fn, args)
 }
 
 run_svg_gadget_server <- function() {

@@ -83,3 +83,56 @@ test_that("build_svg_gadget_ui includes expected control ids", {
   expect_true(grepl("reset_view", html, fixed = TRUE))
   expect_true(grepl("svg_viewport", html, fixed = TRUE))
 })
+
+test_that("build_dialog_viewer uses title when available", {
+  captured <- NULL
+  fake_dialog_viewer <- function(title = NULL, width, height) {
+    captured <<- list(title = title, width = width, height = height)
+    function(...) NULL
+  }
+
+  out <- rstudioSvgViewer:::build_dialog_viewer(
+    file_label = "demo.svg",
+    dialog_viewer_fn = fake_dialog_viewer
+  )
+
+  expect_true(is.function(out))
+  expect_equal(captured$title, "SVG Viewer - demo.svg")
+  expect_equal(captured$width, 980)
+  expect_equal(captured$height, 760)
+})
+
+test_that("build_dialog_viewer falls back to dialogName", {
+  captured <- NULL
+  fake_dialog_viewer <- function(dialogName = NULL, width, height) {
+    captured <<- list(dialogName = dialogName, width = width, height = height)
+    function(...) NULL
+  }
+
+  out <- rstudioSvgViewer:::build_dialog_viewer(
+    file_label = "legacy.svg",
+    dialog_viewer_fn = fake_dialog_viewer
+  )
+
+  expect_true(is.function(out))
+  expect_equal(captured$dialogName, "SVG Viewer - legacy.svg")
+  expect_equal(captured$width, 980)
+  expect_equal(captured$height, 760)
+})
+
+test_that("build_dialog_viewer works without title-like formals", {
+  captured <- NULL
+  fake_dialog_viewer <- function(width, height) {
+    captured <<- list(width = width, height = height)
+    function(...) NULL
+  }
+
+  out <- rstudioSvgViewer:::build_dialog_viewer(
+    file_label = "basic.svg",
+    dialog_viewer_fn = fake_dialog_viewer
+  )
+
+  expect_true(is.function(out))
+  expect_equal(captured$width, 980)
+  expect_equal(captured$height, 760)
+})
