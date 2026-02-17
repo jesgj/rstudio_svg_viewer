@@ -1,0 +1,4 @@
+Name: SVG Viewer
+Description: Preview SVG files in an RStudio gadget.
+Binding: launch_svg_viewer
+Interactive: true
