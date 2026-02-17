@@ -1,0 +1,21 @@
+Package: rstudioSvgViewer
+Type: Package
+Title: RStudio Addin to Visualize SVG Files
+Version: 0.0.0.9000
+Authors@R: person(given = "Codex", family = "Agent", role = c("aut", "cre"),
+    email = "codex@example.com")
+Description: Provides an RStudio addin that previews SVG files in a Shiny gadget.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends:
+    R (>= 4.1.0)
+Imports:
+    htmltools,
+    miniUI,
+    rstudioapi,
+    shiny
+Suggests:
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
