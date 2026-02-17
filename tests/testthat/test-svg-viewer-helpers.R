@@ -208,3 +208,12 @@ test_that("run_gadget_compat works with positional-only signature", {
   expect_identical(captured$second, server_obj)
   expect_identical(captured$third, viewer_obj)
 })
+
+test_that("svg_viewer_js contains pan and wheel interaction hooks", {
+  js <- rstudioSvgViewer:::svg_viewer_js()
+
+  expect_true(grepl("pointerdown", js, fixed = TRUE))
+  expect_true(grepl("pointermove", js, fixed = TRUE))
+  expect_true(grepl("wheel", js, fixed = TRUE))
+  expect_true(grepl("zoomAt", js, fixed = TRUE))
+})
