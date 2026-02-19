@@ -21,11 +21,8 @@ After you upload this project to GitHub, install it with:
 
 ```r
 install.packages("remotes")
-remotes::install_github("YOUR_GITHUB_USERNAME/rstudio_svg_viewer")
+remotes::install_github("jesgj/rstudio_svg_viewer")
 ```
-
-Replace `YOUR_GITHUB_USERNAME/rstudio_svg_viewer` with your actual repository path.
-
 If you publish releases/tags, users can install a specific version:
 
 ```r
