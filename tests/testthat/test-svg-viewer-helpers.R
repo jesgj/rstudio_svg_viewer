@@ -82,6 +82,8 @@ test_that("build_svg_gadget_ui includes expected control ids", {
   expect_true(grepl("fit_view", html, fixed = TRUE))
   expect_true(grepl("reset_view", html, fixed = TRUE))
   expect_true(grepl("svg_viewport", html, fixed = TRUE))
+  expect_true(grepl("zoom_level", html, fixed = TRUE))
+  expect_true(grepl("Drag to pan", html, fixed = TRUE))
   expect_false(grepl(">\\s*pull-right\\s*<", html))
 })
 
@@ -253,4 +255,5 @@ test_that("svg_viewer_js contains pan and wheel interaction hooks", {
   expect_true(grepl("pointermove", js, fixed = TRUE))
   expect_true(grepl("wheel", js, fixed = TRUE))
   expect_true(grepl("zoomAt", js, fixed = TRUE))
+  expect_true(grepl("updateZoomLevel", js, fixed = TRUE))
 })
